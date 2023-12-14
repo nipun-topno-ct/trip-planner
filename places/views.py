@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
 import json
+import os
 
 
 GPT_URL = 'https://openai-hack-3.openai.azure.com/openai/deployments/openai-Hack-key3/chat/completions'
@@ -31,10 +32,14 @@ class GetPlacesView(APIView):
     "max_tokens": 1500
 }'''
 
+        imgs = open('places/resources/place_images.json')
+        imgs_data = json.load(imgs)
+        imgs.close()
+
         latitude = request.GET.get('latitude')
         longitude = request.GET.get('longitude')
 
-        poi_content = f'"What are the 10 best places to visit near the coordinates: {latitude}, {longitude}? Give the ouput in comma separated format with just the names."'
+        poi_content = f'"What are the 7 best places to visit near the coordinates: {latitude}, {longitude}? Give the ouput in comma separated format with just the names."'
         poi_data = data % poi_content
 
         response = requests.post(url=GPT_URL, params=params, headers=headers, data=poi_data)
@@ -66,6 +71,10 @@ class GetPlacesView(APIView):
         for obj in details_store:
             if not isinstance(obj['distance'], str):
                 obj['distance'] = f'{obj["distance"]} km'
-            obj['img_url'] = 'https://etimg.etb2bimg.com/photo/94049186.cms'
+            obj['img_url'] = 'https://media-cdn.tripadvisor.com/media/photo-s/01/5d/28/78/montego-bay.jpg'
+            for entry in imgs_data:
+                if obj['place'].lower() == entry['name'].lower() or obj['place'].lower().find(entry['name'].lower()) != -1 or entry['name'].lower().find(obj['place'].lower()) != -1:
+                    obj['img_url'] = entry['img']
+                    break
 
         return Response(details_store)
