@@ -7,11 +7,38 @@ from rest_framework.response import Response
 
 @api_view(['POST'])
 def plan_trip(request):
-    # Extract parameters from the request (e.g., location, time remaining)
     request_body = json.loads(request.body)
 
-    location = request_body['location']
+    latitude = request_body['latitude']
+    longitude = request_body['longitude']
     places = request_body['places']
+
+    openai.api_type = "azure"
+    openai.api_base = "https://openai-hack-3.openai.azure.com/"
+    openai.api_version = "2023-07-01-preview"
+    openai.api_key = "f0b2edade75a4379902455ad926ad5c1"
+
+    location_prompt = f'give a random locality inside the city which is at the coordinates: {latitude}, {longitude}. Response should only contain the locality name'
+    print(location_prompt)
+
+    message_text = [
+        {
+            "role": "system",
+            "content": location_prompt
+        }
+    ]
+    location_response = openai.ChatCompletion.create(
+        engine = "openai-Hack-key3",
+        messages = message_text,
+        temperature = 0.7,
+        max_tokens = 800,
+        top_p = 0.95,
+        frequency_penalty = 0,
+        presence_penalty = 0,
+        stop = None
+    )
+    location = location_response['choices'][0]['message']['content']
+    print(location)
 
     # GPT-3 prompt based on the user's input
     fields = [
@@ -22,40 +49,26 @@ def plan_trip(request):
         '5. journey_time: time taken to travel from initial place to destination place (with time unit)',
         '6. journey_cost: money spent to travel from initial place to destination place',
     ]
-    prompt = f"im at {location} ,I want to explore {places},now give me a detailed plan for a trip accordingly and give me an order in which I have to visit them, give me the output only in stringified json format:" + " [ { required fields }, { required_fields}, ... ] where the required fields are: %s" % ', '.join(fields)
-    print(prompt)
-    print("????????\n\n")
+    trip_prompt = f"I am currently at {location}. I want to explore all of the following places: {places}, now give me a detailed plan for a trip accordingly and give me an order in which I have to visit them which is time efficient, give me the output only in stringified json format:" + " [ { required fields }, { required_fields}, ... ] where the required fields are: %s" % ', '.join(fields)
+    print(trip_prompt)
 
-    openai.api_type = "azure"
-
-    openai.api_base = "https://openai-hack-3.openai.azure.com/"
-
-    openai.api_version = "2023-07-01-preview"
-
-    openai.api_key = "f0b2edade75a4379902455ad926ad5c1"
-
-    message_text = [{"role":"system","content":prompt}]
-    
-    completion = openai.ChatCompletion.create(
-
-        engine="openai-Hack-key3",
-
+    message_text = [
+        {
+            "role": "system",
+            "content": trip_prompt
+        }
+    ]
+    trip_plan = openai.ChatCompletion.create(
+        engine = "openai-Hack-key3",
         messages = message_text,
-
-        temperature=0.7,
-
-        max_tokens=800,
-
-        top_p=0.95,
-
-        frequency_penalty=0,
-
-        presence_penalty=0,
-
-        stop=None
-
+        temperature = 0.7,
+        max_tokens = 800,
+        top_p = 0.95,
+        frequency_penalty = 0,
+        presence_penalty = 0,
+        stop = None
     )
-    content = completion['choices'][0]['message']['content']
-    print(content)
+    trip_response = trip_plan['choices'][0]['message']['content']
+    print(trip_response)
 
-    return  Response(json.loads(content))
+    return Response(json.loads(trip_response))
