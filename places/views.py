@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
 import json
-import os
+import random
 
 
 GPT_URL = 'https://openai-hack-3.openai.azure.com/openai/deployments/openai-Hack-key3/chat/completions'
@@ -78,3 +78,14 @@ class GetPlacesView(APIView):
                     break
 
         return Response(details_store)
+
+
+class GetHotspotsView(APIView):
+    def get(self, request):
+        hotspots = open('places/resources/hotspots.json')
+        hotspots_data = json.load(hotspots)
+        hotspots.close()
+
+        ind = random.randint(0, len(hotspots_data) - 1)
+
+        return Response(hotspots_data[ind])

@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import re_path
 from places.views import GetPlacesView
+from places.views import GetHotspotsView
 from trips.views import plan_trip
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('api/fetch-places', GetPlacesView.as_view()),
-    re_path('api/plan-trip', plan_trip, name='plan_trip')
+    re_path('api/plan-trip', plan_trip, name='plan_trip'),
+    re_path('api/fetch-hotspot', GetHotspotsView.as_view())
 ]
