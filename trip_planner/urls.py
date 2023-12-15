@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import re_path
 from places.views import GetPlacesView
+from places.views import GetHotspotsView
 from trips.views import plan_trip
 from expense.views import expense
 from expense.views import get_expenses
@@ -27,8 +28,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('api/fetch-places', GetPlacesView.as_view()),
     re_path('api/plan-trip', plan_trip, name='plan_trip'),
+    re_path('api/fetch-hotspot', GetHotspotsView.as_view()),
     re_path('api/expense/add',expense,name='expense'),
     re_path('api/expenses/total', get_expenses, name='get_all_expenses'),
     re_path('api/expense/delete/<int:expense_id>', delete_expense, name='delete_expense'),
-    re_path(r'^api/get_tip/(?P<text>.*)/$', get_tip, name='get_tip'),
+    re_path(r'^api/get_tip/(?P<text>.*)/$', get_tip, name='get_tip')
 ]
